@@ -1,0 +1,31 @@
+ requests
+import time
+import random
+
+headers = {
+    "User-Agent": "Mozilla/5.0...",
+    "Accept-Language": "zh-CN,zh;q=0.9",
+    "Connection": "keep-alive"
+}
+
+def attract_spider(url):
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            print(f"成功吸引蜘蛛访问: {url}")
+            return True
+    except Exception as e:
+        print(f"访问异常: {str(e)}")
+    return False
+
+ class SpiderAttractor {
+    private List<String> targetUrls;
+    private BaiduSearchConsole baiduApi;
+
+    public void configureStrategy() {
+        PriorityStrategy strategy = new PriorityStrategy();
+        strategy.setUpdateFrequency(DAILY);
+        strategy.setPriorityLevel(HIGH);
+        baiduApi.applyStrategy(strategy);
+    }
+}
