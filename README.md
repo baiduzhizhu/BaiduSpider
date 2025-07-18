@@ -1,33 +1,53 @@
-# BaiduSpider
+BaiduSpider 包含两层含义，分别指百度官方搜索引擎的爬虫程序和第三方开源爬虫框架：
 
-import requests
-from datetime import datetime
+一、百度官方搜索引擎爬虫（百度蜘蛛）
 
-class BaiduSpiderPusher:
-    def __init__(self, site_url, token):
-        self.api_url = "http://data.zz.baidu.com/urls"
-        self.site_url = site_url
-        self.token = token
+核心功能‌
+负责自动抓取互联网网页、图片、视频等内容，通过链接分析连续爬行访问，将内容提交至百度搜索引擎进行索引建立，最终使用户能搜索到相关网页‌。
 
-    def push_urls(self, urls):
-        headers = {'Content-Type': 'text/plain'}
-        params = {
-            'site': self.site_url,
-            'token': self.token,
-            'type': 'realtime'
-        }
-        payload = "\n".join(urls)
-        try:
-            response = requests.post(
-                self.api_url,
-                params=params,
-                headers=headers,
-                data=payload
-            )
-            result = response.json()
-            if result.get('success'):
-                print(f"[{datetime.now()}] 成功推送 {len(urls)} 个URL")
-            else:
-                print(f"推送失败: {result.get('message')}")
-        except Exception as e:
-            print(f"推送异常: {str(e)}")
+工作流程与技术特性‌
+
+调度机制‌：由调度程序控制爬虫行为，采用分布式多服务器多线程架构提升效率，爬虫仅负责下载网页‌。
+数据处理‌：抓取的网页暂存至“补充数据区”，经质量分析（如去重、信任度评估）后，合格内容转入“检索区”形成稳定排名；补充数据可能被过滤（即“被K”）‌。
+抓取策略‌：
+种子站点优先‌：从门户类种子站点开始抓取‌。
+深度优先 & 权重优先‌：深度优先用于获取高质量页面，权重优先则优先抓取反链多的页面；实际抓取率40%属正常，60%为优秀，100%不可实现‌。
+死链处理‌：遇到无效链接时停止抓取，未收录页面将影响网站SEO效果‌。
+
+识别与分类‌
+不同百度产品线有专属User-Agent标识，例如：
+
+网页搜索：Baiduspider
+图片搜索：Baiduspider-image
+视频搜索：Baiduspider-video‌。
+二、第三方开源Python爬虫框架（BaiduSpider项目）
+
+项目定位‌
+轻量级框架，基于Python 3.6+开发，通过Requests和BeautifulSoup抓取百度搜索结果，提供简洁API支持网页、新闻、图片等多元搜索类型‌。
+
+核心功能与使用‌
+
+安装与基础调用‌：
+bash
+Copy Code
+pip install baiduspider
+
+python
+Copy Code
+from baiduspider import BaiduSpider
+results = BaiduSpider().search_web("关键词", pn=页码)  # pn指定页码
+```‌:ml-citation{ref="3,6" data="citationList"}  
+
+应用场景‌：舆情分析（监测关键词热度）、学术研究（收集论文链接）、竞品监控等‌。
+开发建议‌：异步请求提升效率、异常处理保障稳定性、数据库存储优化数据管理‌。
+
+项目生态‌
+
+托管于GitHub，采用GPL-3.0协议，截至2024年6月已获1.1k星‌。
+提供Web API服务及完整文档，支持问题排查（如安装失败、结果获取异常）‌。
+关键区别总结
+维度‌	‌官方百度爬虫‌	‌开源框架‌
+主体‌	百度搜索引擎内部程序	第三方开发者工具
+目标‌	全网内容抓取与索引	定向获取百度搜索结果
+控制方‌	百度调度系统	用户自主调用API
+技术栈‌	分布式多线程架构	Python（Requests/BeautifulSoup）
